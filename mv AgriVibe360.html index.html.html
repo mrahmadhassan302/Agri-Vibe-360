@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agri Vibe 360 — Pakistan Smart Farming Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g1:#1a3a2a;--g2:#2d6a4f;--g3:#40916c;--g4:#74c69d;--g5:#b7e4c7;
+  --a1:#e76f00;--a2:#f4a261;
+  --warn:#c9a800;--danger:#c0392b;--info:#1565c0;
+  --bg:#f0f4f0;--card:#fff;--text:#1a2e1a;--muted:#5a7a5a;--border:#cce3d4;
+}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height:100vh;overflow:hidden;}
+
+.app-shell{display:flex;height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:230px;background:var(--g1);flex-shrink:0;display:flex;flex-direction:column;overflow-y:auto;}
+.sidebar-logo{padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,0.1);}
+.brand{color:#74c69d;font-size:18px;font-weight:600;letter-spacing:-0.3px;}
+.tagline{color:rgba(255,255,255,0.4);font-size:10px;font-family:'JetBrains Mono',monospace;margin-top:3px;}
+.nav-section{padding:12px 12px 4px;color:rgba(255,255,255,0.35);font-size:9px;font-weight:500;letter-spacing:1px;text-transform:uppercase;font-family:'JetBrains Mono',monospace;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 8px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.6);font-size:13px;transition:all 0.15s;user-select:none;}
+.nav-item:hover{background:rgba(255,255,255,0.08);color:#fff;}
+.nav-item.active{background:var(--g3);color:#fff;}
+.nav-item .ni{font-size:15px;width:18px;text-align:center;}
+.nav-badge{margin-left:auto;background:var(--a1);color:#fff;font-size:9px;padding:2px 6px;border-radius:10px;font-weight:500;}
+.sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid rgba(255,255,255,0.1);}
+.lang-toggle{display:flex;gap:4px;}
+.lang-btn{flex:1;padding:6px;background:rgba(255,255,255,0.08);border:none;border-radius:6px;color:rgba(255,255,255,0.6);font-size:11px;cursor:pointer;font-family:'Sora',sans-serif;transition:all 0.15s;}
+.lang-btn.active{background:var(--g3);color:#fff;}
+
+/* MAIN */
+.main{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.topbar{padding:14px 24px;background:var(--card);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,0.05);}
+.weather-pill{display:flex;align-items:center;gap:6px;background:#e8f5e9;border:1px solid #c8e6c9;border-radius:20px;padding:5px 12px;font-size:12px;color:#2e7d32;}
+.offline-tag{display:inline-flex;align-items:center;gap:4px;background:#e8f5e9;color:#2e7d32;font-size:10px;padding:3px 8px;border-radius:10px;border:1px solid #c8e6c9;}
+.farmer-info{display:flex;align-items:center;gap:8px;}
+.farmer-avatar{width:32px;height:32px;background:var(--g3);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:600;}
+.farmer-name{font-size:13px;font-weight:500;}
+.farmer-sub{font-size:11px;color:var(--muted);}
+
+.content{flex:1;overflow-y:auto;padding:20px 24px;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* COMPONENTS */
+.section-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.section-title span{font-size:11px;color:var(--muted);font-weight:400;}
+
+.metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 16px;}
+.metric-val{font-size:22px;font-weight:600;line-height:1;}
+.metric-label{font-size:11px;color:var(--muted);margin-top:4px;}
+.metric-change{font-size:10px;margin-top:6px;}
+.up{color:#2e7d32;} .down{color:var(--danger);}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.card-title{font-size:13px;font-weight:600;}
+.badge{font-size:10px;padding:3px 8px;border-radius:10px;font-weight:500;}
+.badge-green{background:#e8f5e9;color:#2e7d32;}
+.badge-warn{background:#fff8e1;color:#e65100;}
+.badge-danger{background:#ffebee;color:#c62828;}
+.badge-info{background:#e3f2fd;color:#1565c0;}
+
+.alert-item{display:flex;align-items:flex-start;gap:10px;padding:9px;border-radius:8px;margin-bottom:6px;background:var(--bg);}
+.alert-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+
+.crop-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg);}
+.crop-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;background:var(--bg);}
+.crop-name{font-size:13px;font-weight:500;}
+.crop-meta{font-size:11px;color:var(--muted);}
+.progress-bar{width:80px;height:4px;background:var(--bg);border-radius:2px;overflow:hidden;margin-top:3px;}
+.progress-fill{height:100%;border-radius:2px;}
+
+.soil-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px;}
+.soil-card{background:var(--bg);border-radius:8px;padding:10px;text-align:center;}
+.soil-val{font-size:18px;font-weight:600;}
+.soil-label{font-size:10px;color:var(--muted);margin-top:2px;}
+
+.action-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.action-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;text-align:center;transition:all 0.15s;font-family:'Sora',sans-serif;}
+.action-btn:hover{border-color:var(--g3);background:#f0faf4;transform:translateY(-1px);}
+.action-icon{font-size:24px;margin-bottom:6px;}
+.action-label{font-size:11px;font-weight:500;color:var(--text);}
+
+.feed-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--bg);}
+.feed-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.feed-title{font-size:12px;font-weight:500;}
+.feed-desc{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4;}
+.feed-time{font-size:10px;color:var(--muted);margin-top:4px;}
+
+.price-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bg);font-size:12px;}
+.price-crop{flex:1;font-weight:500;}
+.price-val{font-weight:600;}
+.price-chg{font-size:11px;min-width:44px;text-align:right;}
+
+.loan-card{background:linear-gradient(135deg,var(--g1),var(--g2));border-radius:12px;padding:18px;color:#fff;margin-bottom:12px;}
+.loan-title{font-size:12px;opacity:0.65;margin-bottom:4px;}
+.loan-amount{font-size:28px;font-weight:600;}
+.loan-meta{font-size:11px;opacity:0.55;margin-top:4px;}
+.loan-actions{display:flex;gap:8px;margin-top:14px;}
+.loan-btn{flex:1;padding:8px;border-radius:7px;border:none;cursor:pointer;font-size:11px;font-family:'Sora',sans-serif;font-weight:500;transition:opacity 0.15s;}
+.loan-btn:hover{opacity:0.85;}
+.loan-btn-primary{background:#74c69d;color:#1a3a2a;}
+.loan-btn-secondary{background:rgba(255,255,255,0.15);color:#fff;}
+
+.scheme-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:border-color 0.15s;}
+.scheme-item:hover{border-color:var(--g3);}
+.scheme-org{width:32px;height:32px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.scheme-name{font-size:12px;font-weight:500;flex:1;}
+.scheme-amt{font-size:11px;color:var(--g3);font-weight:600;}
+
+.sos-btn{width:100%;padding:14px;border-radius:12px;background:var(--danger);color:#fff;border:none;font-size:14px;font-weight:600;cursor:pointer;font-family:'Sora',sans-serif;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity 0.15s;}
+.sos-btn:hover{opacity:0.9;}
+
+.cta-btn{width:100%;padding:11px;border-radius:10px;background:var(--g2);color:#fff;border:none;font-size:12px;font-weight:500;cursor:pointer;font-family:'Sora',sans-serif;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background 0.15s;}
+.cta-btn:hover{background:var(--g3);}
+
+.tag{display:inline-flex;align-items:center;gap:4px;background:#e8f5e9;color:#2e7d32;font-size:10px;padding:3px 8px;border-radius:10px;margin:2px;border:1px solid #c8e6c9;}
+
+.wbar-container{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:12px;}
+.wbar-wrap{display:flex;flex-direction:column;align-items:center;}
+.wbar{width:100%;background:var(--g5);border-radius:3px;position:relative;height:50px;}
+.wbar-fill{border-radius:3px;background:var(--g3);position:absolute;bottom:0;width:100%;transition:height 0.3s;}
+.wday{font-size:9px;color:var(--muted);text-align:center;margin-top:3px;}
+
+.steps-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.step-box{text-align:center;padding:14px;background:var(--bg);border-radius:10px;}
+.step-icon{font-size:22px;margin-bottom:6px;}
+.step-title{font-size:11px;font-weight:500;}
+.step-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+
+/* scrollbar */
+.content::-webkit-scrollbar{width:4px;}
+.content::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="brand">🌿 Agri Vibe 360</div>
+    <div class="tagline">Pakistan Smart Farming · 2026</div>
+  </div>
+  <div class="nav-section">Core Modules</div>
+  <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="ni">📊</span>Dashboard</div>
+  <div class="nav-item" onclick="showPage('diagnosis',this)"><span class="ni">🔬</span>AI Diagnosis<span class="nav-badge">AI</span></div>
+  <div class="nav-item" onclick="showPage('water',this)"><span class="ni">💧</span>Water Planner</div>
+  <div class="nav-item" onclick="showPage('market',this)"><span class="ni">📈</span>Market Prices</div>
+  <div class="nav-item" onclick="showPage('soil',this)"><span class="ni">🌱</span>Soil Health</div>
+  <div class="nav-section">Support</div>
+  <div class="nav-item" onclick="showPage('finance',this)"><span class="ni">🏦</span>Finance & Credit</div>
+  <div class="nav-item" onclick="showPage('advisory',this)"><span class="ni">🤝</span>Expert Advisory</div>
+  <div class="nav-item" onclick="showPage('machinery',this)"><span class="ni">🚜</span>AR Machinery</div>
+  <div class="nav-section">Community</div>
+  <div class="nav-item" onclick="showPage('community',this)"><span class="ni">👥</span>Kisan Network</div>
+  <div class="nav-item" onclick="showPage('alerts',this)"><span class="ni">🚨</span>Disaster Alerts<span class="nav-badge">3</span></div>
+  <div class="nav-item" onclick="showPage('women',this)"><span class="ni">👩‍🌾</span>Women & Youth</div>
+  <div class="sidebar-bottom">
+    <div style="color:rgba(255,255,255,0.4);font-size:10px;margin-bottom:6px;font-family:'JetBrains Mono',monospace;">Language / زبان</div>
+    <div class="lang-toggle">
+      <button class="lang-btn" onclick="setLang(this)">EN</button>
+      <button class="lang-btn active" onclick="setLang(this)">اردو</button>
+      <button class="lang-btn" onclick="setLang(this)">ਪੰਜਾਬੀ</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="weather-pill">☀️ 34°C · Lahore · Low Rain Risk · Next 3 days sunny</div>
+      <div class="offline-tag">📶 Offline Ready</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:16px;">
+      <div style="position:relative;cursor:pointer;">
+        🔔
+        <div style="position:absolute;top:-2px;right:-2px;width:8px;height:8px;background:var(--danger);border-radius:50%;border:2px solid #fff;"></div>
+      </div>
+      <div class="farmer-info">
+        <div class="farmer-avatar">AH</div>
+        <div>
+          <div class="farmer-name">Ahmad Hassan</div>
+          <div class="farmer-sub">Sheikhupura · 12 acres · Premium</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div class="page active" id="page-dashboard">
+      <div class="section-title">Farm Overview <span>Updated just now · May 3, 2026</span></div>
+
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-val" style="color:var(--g3)">92%</div>
+          <div class="metric-label">Crop Health Score</div>
+          <div class="metric-change up">↑ +3% vs last week</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" style="color:#1565c0">340L</div>
+          <div class="metric-label">Water Used Today</div>
+          <div class="metric-change up">↓ 28% below avg — saved!</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" style="color:var(--a1)">PKR 4,200</div>
+          <div class="metric-label">Saved This Month</div>
+          <div class="metric-change up">↑ AR self-repairs</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-val" style="color:var(--danger)">2</div>
+          <div class="metric-label">Active Alerts</div>
+          <div class="metric-change down">Whitefly + Heatwave</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">🌾 Active Crops (4)</div><span class="badge badge-green">Growing</span></div>
+          <div class="crop-row">
+            <div class="crop-icon">🌾</div>
+            <div style="flex:1"><div class="crop-name">Wheat (Gandum)</div><div class="crop-meta">Harvesting in 18 days</div></div>
+            <div style="text-align:right"><div style="font-size:11px;color:var(--g3);font-weight:600">88%</div><div class="progress-bar"><div class="progress-fill" style="width:88%;background:var(--g3)"></div></div></div>
+          </div>
+          <div class="crop-row">
+            <div class="crop-icon">🌿</div>
+            <div style="flex:1"><div class="crop-name">Cotton (Kapas)</div><div class="crop-meta">Flowering stage · Whitefly alert</div></div>
+            <div style="text-align:right"><div style="font-size:11px;color:var(--a1);font-weight:600">62%</div><div class="progress-bar"><div class="progress-fill" style="width:62%;background:var(--a1)"></div></div></div>
+          </div>
+          <div class="crop-row">
+            <div class="crop-icon">🌽</div>
+            <div style="flex:1"><div class="crop-name">Maize (Makki)</div><div class="crop-meta">Germination phase</div></div>
+            <div style="text-align:right"><div style="font-size:11px;color:#1565c0;font-weight:600">22%</div><div class="progress-bar"><div class="progress-fill" style="width:22%;background:#1565c0"></div></div></div>
+          </div>
+          <div class="crop-row">
+            <div class="crop-icon">🍅</div>
+            <div style="flex:1"><div class="crop-name">Tomato (Tamatar)</div><div class="crop-meta">Needs irrigation today</div></div>
+            <div style="text-align:right"><div style="font-size:11px;color:var(--danger);font-weight:600">45%</div><div class="progress-bar"><div class="progress-fill" style="width:45%;background:var(--danger)"></div></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">🚨 Alerts & Advisories</div><span class="badge badge-danger">2 Urgent</span></div>
+          <div class="alert-item">
+            <div class="alert-icon" style="background:#ffebee">🦟</div>
+            <div>
+              <div style="font-size:12px;font-weight:500">Whitefly in cotton — take action today</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Neem spray (2% dilution) in evening. Mechanic: 2.4km away.</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">2h ago · AI Camera Scan</div>
+            </div>
+          </div>
+          <div class="alert-item">
+            <div class="alert-icon" style="background:#fff8e1">🌡️</div>
+            <div>
+              <div style="font-size:12px;font-weight:500">Heatwave warning — 43°C tomorrow</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Irrigate wheat before 6am. Delay pesticide spraying.</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">Just now · PMD Met Office</div>
+            </div>
+          </div>
+          <div class="alert-item">
+            <div class="alert-icon" style="background:#e3f2fd">💰</div>
+            <div>
+              <div style="font-size:12px;font-weight:500">Wheat price up 8% in Lahore Mandi</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">Best sell window: next 3 days before Sindh harvest arrives.</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">1h ago · Market AI</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚡ Quick Actions</div></div>
+          <div class="action-grid">
+            <div class="action-btn" onclick="showPage('diagnosis',document.querySelector('.nav-item:nth-child(3)'))"><div class="action-icon">📸</div><div class="action-label">Scan Crop / Pest</div></div>
+            <div class="action-btn" onclick="showPage('water',document.querySelector('.nav-item:nth-child(4)'))"><div class="action-icon">💧</div><div class="action-label">Irrigation Plan</div></div>
+            <div class="action-btn" onclick="showPage('machinery',document.querySelector('.nav-item:nth-child(9)'))"><div class="action-icon">🔧</div><div class="action-label">AR Repair Guide</div></div>
+            <div class="action-btn" onclick="showPage('market',document.querySelector('.nav-item:nth-child(5)'))"><div class="action-icon">📊</div><div class="action-label">Mandi Rates</div></div>
+            <div class="action-btn" onclick="showPage('finance',document.querySelector('.nav-item:nth-child(7)'))"><div class="action-icon">🏦</div><div class="action-label">Apply for Loan</div></div>
+            <div class="action-btn" onclick="showPage('alerts',document.querySelector('.nav-item:nth-child(11)'))"><div class="action-icon">🌦️</div><div class="action-label">Weather + Alerts</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🌱 Soil Health Summary</div><span class="badge badge-warn">Nitrogen Low</span></div>
+          <div class="soil-grid">
+            <div class="soil-card"><div class="soil-val" style="color:var(--a1)">42%</div><div class="soil-label">Nitrogen (N)</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3)">68%</div><div class="soil-label">Phosphorus (P)</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3)">71%</div><div class="soil-label">Potassium (K)</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--danger)">7.8</div><div class="soil-label">pH Level</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:#1565c0">38%</div><div class="soil-label">Moisture</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3)">1.2</div><div class="soil-label">EC (dS/m)</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AI DIAGNOSIS ===== -->
+    <div class="page" id="page-diagnosis">
+      <div class="section-title">AI Crop & Machinery Diagnosis <span>On-device · 92%+ accuracy · Offline works</span></div>
+
+      <div class="grid-2" style="margin-bottom:20px;">
+        <div class="card" style="grid-column:span 2">
+          <div class="card-header"><div class="card-title">📸 Upload for Instant AI Diagnosis</div><span class="badge badge-green">50+ diseases · 30+ pests · Machinery faults</span></div>
+          <div style="border:2px dashed var(--border);border-radius:10px;padding:36px;text-align:center;cursor:pointer;margin-bottom:14px;transition:background 0.15s;" onmouseover="this.style.background='#f0faf4'" onmouseout="this.style.background=''">
+            <div style="font-size:44px;margin-bottom:10px;">📷</div>
+            <div style="font-size:14px;font-weight:500;color:var(--text)">Tap to photograph: crop leaf · pest · soil · machinery</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:6px;">On-device TensorFlow Lite model · No internet required · Result in under 3 minutes</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="tag">🌿 Wheat diseases</span>
+            <span class="tag">🌾 Cotton pests</span>
+            <span class="tag">🍅 Tomato blight</span>
+            <span class="tag">🚜 Tractor faults</span>
+            <span class="tag">💦 Pump issues</span>
+            <span class="tag">🌱 Soil analysis</span>
+            <span class="tag">📴 No internet needed</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Recent Diagnoses</div></div>
+          <div class="feed-item">
+            <div class="feed-dot" style="background:#ffebee">🦟</div>
+            <div style="flex:1">
+              <div class="feed-title">Whitefly Infestation</div>
+              <div class="feed-desc">Cotton field · 87% confidence</div>
+              <div class="feed-time">3 hours ago</div>
+            </div>
+            <span class="badge badge-danger">Action Needed</span>
+          </div>
+          <div class="feed-item">
+            <div class="feed-dot" style="background:#fff8e1">🌡️</div>
+            <div style="flex:1">
+              <div class="feed-title">Nitrogen Deficiency</div>
+              <div class="feed-desc">Wheat field · 94% confidence</div>
+              <div class="feed-time">Yesterday</div>
+            </div>
+            <span class="badge badge-warn">Monitor</span>
+          </div>
+          <div class="feed-item">
+            <div class="feed-dot" style="background:#e8f5e9">✅</div>
+            <div style="flex:1">
+              <div class="feed-title">Healthy — No Issue</div>
+              <div class="feed-desc">Maize field · 99% confidence</div>
+              <div class="feed-time">2 days ago</div>
+            </div>
+            <span class="badge badge-green">Healthy</span>
+          </div>
+          <div class="feed-item">
+            <div class="feed-dot" style="background:#e3f2fd">🚜</div>
+            <div style="flex:1">
+              <div class="feed-title">Fuel Filter Blockage</div>
+              <div class="feed-desc">Tractor · 91% confidence · Fixed via AR</div>
+              <div class="feed-time">5 days ago</div>
+            </div>
+            <span class="badge badge-info">Resolved</span>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header"><div class="card-title">🧪 Treatment Plan — Whitefly</div><span class="badge badge-danger">Active Alert</span></div>
+            <div style="background:#fff8e1;border-radius:8px;padding:12px;margin-bottom:8px;">
+              <div style="font-size:12px;font-weight:500;color:#e65100;margin-bottom:4px;">Immediate Action Required</div>
+              <div style="font-size:12px;line-height:1.6">Apply Neem Oil spray (2% dilution) in evening. Repeat after 5 days. Cost estimate: <strong>PKR 340</strong></div>
+            </div>
+            <div style="background:#e8f5e9;border-radius:8px;padding:12px;">
+              <div style="font-size:12px;font-weight:500;color:#2e7d32;margin-bottom:4px;">📍 Nearby Agri Store — 1.8km</div>
+              <div style="font-size:12px;">Ali Agri Supplies · Imidacloprid available · PKR 890/pack</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">🔍 Fake Pesticide Checker</div><span class="badge badge-warn">Scan Barcode</span></div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px;">Scan pesticide/fertilizer barcode to verify authenticity, check expiry date, and get correct dosage. Protects against PKR 200B+ losses from adulterated inputs.</div>
+            <button class="cta-btn">📱 Scan Product Barcode</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== WATER PLANNER ===== -->
+    <div class="page" id="page-water">
+      <div class="section-title">Smart Irrigation Planner <span>Save 30%+ water · Weather + soil integrated</span></div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Today's Water Budget</div></div>
+          <div style="text-align:center;padding:10px 0;">
+            <div style="font-size:42px;font-weight:600;color:var(--g3);line-height:1">340L</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Used of 480L recommended</div>
+            <div style="margin-top:10px;font-size:11px;color:var(--g3);background:#e8f5e9;border-radius:6px;padding:5px 12px;display:inline-block;border:1px solid #c8e6c9;">✓ 29% below average — Excellent!</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">7-Day Schedule</div><span class="badge badge-info">AI Generated</span></div>
+          <div class="wbar-container">
+            <div class="wbar-wrap"><div class="wbar"><div class="wbar-fill" style="height:70%"></div></div><div class="wday">Mon</div></div>
+            <div class="wbar-wrap"><div class="wbar"><div class="wbar-fill" style="height:45%"></div></div><div class="wday">Tue</div></div>
+            <div class="wbar-wrap"><div class="wbar" style="background:#ffcdd2"><div class="wbar-fill" style="height:90%;background:var(--danger)"></div></div><div class="wday">Wed</div></div>
+            <div class="wbar-wrap"><div class="wbar"><div class="wbar-fill" style="height:60%"></div></div><div class="wday">Thu</div></div>
+            <div class="wbar-wrap"><div class="wbar"><div class="wbar-fill" style="height:35%"></div></div><div class="wday">Fri</div></div>
+            <div class="wbar-wrap"><div class="wbar"><div class="wbar-fill" style="height:55%"></div></div><div class="wday">Sat</div></div>
+            <div class="wbar-wrap"><div class="wbar"><div class="wbar-fill" style="height:40%"></div></div><div class="wday">Sun</div></div>
+          </div>
+          <div style="font-size:10px;color:var(--danger);margin-top:8px;">⚠️ Wed: 43°C heatwave — high water demand</div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Canal Water Status</div><span class="badge badge-warn">62% Flow</span></div>
+          <div style="font-size:12px;line-height:1.6;color:var(--text);margin-bottom:10px;">
+            <strong>Upper Chenab Canal:</strong> 62% capacity.<br>
+            Next warabandi turn: <strong>Tuesday 4am</strong><br>
+            Duration: 3.5 hours scheduled
+          </div>
+          <div style="font-size:11px;background:#fff8e1;border-radius:6px;padding:8px;color:#e65100;line-height:1.5;">⚠️ Report illegal water diversions. Smallholder rights protection active.</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">💧 Drip Irrigation Advisor</div><span class="badge badge-green">Saves 40% water</span></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px;">Switch tomatoes from flood to drip irrigation. Estimated daily saving: 142L. Payback period: 14 months. Punjab subsidy available: 50% off.</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+            <div class="soil-card"><div class="soil-val" style="color:var(--danger);font-size:14px">Flood</div><div class="soil-label">Current: 480L/day</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3);font-size:14px">Drip</div><div class="soil-label">Target: 290L/day</div></div>
+          </div>
+          <button class="cta-btn">Apply for Drip Subsidy (50% off)</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">🗺️ Waterlogging & Salinity Map</div><span class="badge badge-danger">2 Risk Zones</span></div>
+          <div style="background:var(--bg);border-radius:8px;height:100px;display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--muted);margin-bottom:10px;border:1px dashed var(--border);">🗺️ Tap to view field risk mapping</div>
+          <div style="font-size:11px;color:var(--danger);margin-bottom:6px;line-height:1.5">⚠️ Field 3-B: High salinity. Gypsum treatment (200kg/acre) recommended.</div>
+          <div style="font-size:11px;color:#1565c0;line-height:1.5">ℹ️ Field 7-A: Waterlogging risk. Install tile drainage before monsoon.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MARKET ===== -->
+    <div class="page" id="page-market">
+      <div class="section-title">Live Mandi Prices & Market Intelligence <span>Updated 30 min ago · Lahore · Faisalabad · Multan</span></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Today's Crop Rates</div><span class="badge badge-green">Live</span></div>
+          <div class="price-row"><div class="crop-icon" style="width:22px;height:22px;font-size:13px">🌾</div><div class="price-crop">Wheat (per 40kg)</div><div class="price-val">PKR 3,850</div><div class="price-chg up">↑ 8.2%</div></div>
+          <div class="price-row"><div class="crop-icon" style="width:22px;height:22px;font-size:13px">🌿</div><div class="price-crop">Cotton (per 40kg)</div><div class="price-val">PKR 8,200</div><div class="price-chg down">↓ 2.1%</div></div>
+          <div class="price-row"><div class="crop-icon" style="width:22px;height:22px;font-size:13px">🍚</div><div class="price-crop">Basmati Rice (per 40kg)</div><div class="price-val">PKR 6,400</div><div class="price-chg up">↑ 1.4%</div></div>
+          <div class="price-row"><div class="crop-icon" style="width:22px;height:22px;font-size:13px">🎋</div><div class="price-crop">Sugarcane (per maund)</div><div class="price-val">PKR 540</div><div class="price-chg down">↓ 0.9%</div></div>
+          <div class="price-row"><div class="crop-icon" style="width:22px;height:22px;font-size:13px">🌽</div><div class="price-crop">Maize (per 40kg)</div><div class="price-val">PKR 2,100</div><div class="price-chg up">↑ 3.7%</div></div>
+          <div class="price-row"><div class="crop-icon" style="width:22px;height:22px;font-size:13px">🍅</div><div class="price-crop">Tomato (per 40kg)</div><div class="price-val">PKR 1,800</div><div class="price-chg up">↑ 15%</div></div>
+          <div class="price-row"><div class="crop-icon" style="width:22px;height:22px;font-size:13px">🥔</div><div class="price-crop">Potato (per 40kg)</div><div class="price-val">PKR 1,200</div><div class="price-chg down">↓ 4.5%</div></div>
+        </div>
+
+        <div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header"><div class="card-title">🤖 AI Sell Recommendation</div><span class="badge badge-green">Sell Wheat Now</span></div>
+            <div style="background:#e8f5e9;border-radius:8px;padding:12px;margin-bottom:8px;">
+              <div style="font-size:12px;font-weight:500;color:#2e7d32;margin-bottom:4px;">🌾 SELL wheat — next 3 days</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.5">Price expected to fall after Sindh harvest arrives in ~7 days. Act now.</div>
+            </div>
+            <div style="background:#ffebee;border-radius:8px;padding:12px;">
+              <div style="font-size:12px;font-weight:500;color:#c62828;margin-bottom:4px;">🥔 HOLD potatoes</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.5">Afghanistan border restrictions causing local glut. Wait 2–3 weeks.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">Input Cost Tracker</div><span class="badge badge-warn">Urea +12%</span></div>
+            <div class="price-row"><div class="price-crop">Urea Fertilizer (50kg)</div><div class="price-val">PKR 3,200</div><div class="price-chg down">↑ 12%</div></div>
+            <div class="price-row"><div class="price-crop">DAP Fertilizer (50kg)</div><div class="price-val">PKR 9,800</div><div class="price-chg down">↑ 7%</div></div>
+            <div class="price-row"><div class="price-crop">Diesel (per liter)</div><div class="price-val">PKR 290</div><div class="price-chg down">↑ 3%</div></div>
+            <div class="price-row"><div class="price-crop">Electricity (agri rate/unit)</div><div class="price-val">PKR 18</div><div class="price-chg down">↑ 22%</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">🤝 Arthi Bypass — Direct Buyer Network</div><span class="badge badge-info">Skip Middlemen · Earn 15–25% More</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Connect directly with flour mills, exporters, and FMCGs. Verified buyers, cash payment, truck pickup available.</div>
+        <div class="grid-2">
+          <div class="feed-item"><div class="feed-dot" style="background:#e8f5e9">🏭</div><div><div class="feed-title">Punjab Flour Mills Ltd — Lahore</div><div class="feed-desc">Buying wheat at PKR 4,050/40kg · Cash · Truck pickup available · Min 50 maunds</div></div></div>
+          <div class="feed-item"><div class="feed-dot" style="background:#e3f2fd">📦</div><div><div class="feed-title">Export Aggregator — Multan</div><div class="feed-desc">Basmati rice orders open · Premium price · Export certified</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SOIL HEALTH ===== -->
+    <div class="page" id="page-soil">
+      <div class="section-title">Soil Health Monitor <span>AI-powered analysis · Field-by-field data</span></div>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Macronutrients</div><span class="badge badge-warn">N Deficient</span></div>
+          <div class="soil-grid">
+            <div class="soil-card"><div class="soil-val" style="color:var(--a1)">42%</div><div class="soil-label">Nitrogen (N)</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3)">68%</div><div class="soil-label">Phosphorus (P)</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3)">71%</div><div class="soil-label">Potassium (K)</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--a1);margin-top:10px;line-height:1.5">⚠️ Decades of Urea-only farming has depleted N. Add farmyard manure + balanced NPK.</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Micronutrients</div></div>
+          <div class="soil-grid">
+            <div class="soil-card"><div class="soil-val" style="color:var(--danger)">Low</div><div class="soil-label">Zinc (Zn)</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--a1)">Med</div><div class="soil-label">Iron (Fe)</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3)">OK</div><div class="soil-label">Boron (B)</div></div>
+          </div>
+          <div style="font-size:11px;color:var(--danger);margin-top:10px;line-height:1.5">⚠️ Zinc deficiency common in Punjab. Zinc sulfate 25kg/acre recommended.</div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Physical Properties</div></div>
+          <div class="soil-grid">
+            <div class="soil-card"><div class="soil-val" style="color:var(--danger)">7.8</div><div class="soil-label">pH (Alkaline)</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:#1565c0">38%</div><div class="soil-label">Moisture</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3)">1.2</div><div class="soil-label">EC dS/m</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3)">2.1%</div><div class="soil-label">Organic Matter</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--a1)">Med</div><div class="soil-label">Compaction</div></div>
+            <div class="soil-card"><div class="soil-val" style="color:var(--g3)">Good</div><div class="soil-label">Drainage</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📋 AI Soil Restoration Plan</div><span class="badge badge-green">Personalized</span></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;">
+          <div class="step-box"><div class="step-icon">🌿</div><div class="step-title">Add Farmyard Manure</div><div class="step-sub">10 tons/acre this season</div></div>
+          <div class="step-box"><div class="step-icon">⚗️</div><div class="step-title">Gypsum for Salinity</div><div class="step-sub">200kg/acre Field 3-B</div></div>
+          <div class="step-box"><div class="step-icon">🌱</div><div class="step-title">Green Manure Crop</div><div class="step-sub">Grow sunflower/mung post-harvest</div></div>
+          <div class="step-box"><div class="step-icon">🧪</div><div class="step-title">Zinc Sulfate</div><div class="step-sub">25kg/acre · All fields</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== FINANCE ===== -->
+    <div class="page" id="page-finance">
+      <div class="section-title">Finance & Credit <span>Formal loans · Govt schemes · Crop insurance</span></div>
+      <div class="grid-2">
+        <div>
+          <div class="loan-card">
+            <div class="loan-title">Your Kisan Credit Score</div>
+            <div class="loan-amount">742 / 900</div>
+            <div class="loan-meta">Based on 18 months of crop & payment data · Pre-approved up to PKR 250,000</div>
+            <div class="loan-actions">
+              <button class="loan-btn loan-btn-primary">Apply for Loan</button>
+              <button class="loan-btn loan-btn-secondary">View Full Report</button>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">🏛️ Land Record Verification</div><span class="badge badge-info">Punjab Arazi</span></div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;">Connect to Punjab Arazi Portal to verify land records (Fard), resolve Patwari disputes, and unlock collateral-based bank lending. Clear title = better loan terms.</div>
+            <button class="cta-btn">🗂️ Verify Land Records (Fard)</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Government Schemes & Subsidies</div><span class="badge badge-green">6 Active</span></div>
+          <div class="scheme-item"><div class="scheme-org">🏛️</div><div><div class="scheme-name">PM Kissan Package 2026</div><div style="font-size:10px;color:var(--muted);">Seed & fertilizer subsidy · All farmers</div></div><div class="scheme-amt">PKR 10,000</div></div>
+          <div class="scheme-item"><div class="scheme-org">🌿</div><div><div class="scheme-name">ZTBL Farm Loan</div><div style="font-size:10px;color:var(--muted);">6% markup · No collateral for small farmers</div></div><div class="scheme-amt">Up to 5L</div></div>
+          <div class="scheme-item"><div class="scheme-org">💧</div><div><div class="scheme-name">Drip Irrigation Subsidy</div><div style="font-size:10px;color:var(--muted);">Punjab Agri Dept · Application open</div></div><div class="scheme-amt">50% off</div></div>
+          <div class="scheme-item"><div class="scheme-org">☂️</div><div><div class="scheme-name">Fasal Bima Crop Insurance</div><div style="font-size:10px;color:var(--muted);">Flood · Hail · Pest coverage</div></div><div class="scheme-amt">PKR 800/acre</div></div>
+          <div class="scheme-item"><div class="scheme-org">🐄</div><div><div class="scheme-name">Livestock Insurance</div><div style="font-size:10px;color:var(--muted);">LSD · FMD · Covers all cattle</div></div><div class="scheme-amt">PKR 500/animal</div></div>
+          <div class="scheme-item"><div class="scheme-org">🌱</div><div><div class="scheme-name">UNDP Climate Resilience Grant</div><div style="font-size:10px;color:var(--muted);">Small farmers · SDG aligned</div></div><div class="scheme-amt">PKR 25,000</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ADVISORY ===== -->
+    <div class="page" id="page-advisory">
+      <div class="section-title">Expert Advisory & Extension Services <span>AI + Human experts · Urdu · Punjabi · English</span></div>
+      <div class="grid-2">
+        <div class="card" style="grid-column:span 2">
+          <div class="card-header"><div class="card-title">🤖 AI Farm Advisor — Ask Anything</div><span class="badge badge-green">Online · Urdu/English</span></div>
+          <div style="background:var(--bg);border-radius:10px;padding:14px;min-height:100px;margin-bottom:12px;">
+            <div class="feed-item" style="border:none;padding:0">
+              <div class="feed-dot" style="background:var(--g5)">🤖</div>
+              <div>
+                <div class="feed-title">AI Agri Advisor</div>
+                <div class="feed-desc" style="font-size:12px;line-height:1.6">Assalam o Alaikum Ahmad Bhai! Main aapki har masala solve karne ke liye yahan hoon. Cotton whitefly, soil salinity, irrigation, government schemes — kuch bhi poochhain!</div>
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div class="action-btn" style="flex:none;padding:8px 14px;"><div style="font-size:12px">🌾 گندم کی کھاد</div></div>
+            <div class="action-btn" style="flex:none;padding:8px 14px;"><div style="font-size:12px">🦟 Whitefly Treatment</div></div>
+            <div class="action-btn" style="flex:none;padding:8px 14px;"><div style="font-size:12px">🌱 Soil Restoration</div></div>
+            <div class="action-btn" style="flex:none;padding:8px 14px;"><div style="font-size:12px">🌡️ Heatwave Protection</div></div>
+            <div class="action-btn" style="flex:none;padding:8px 14px;"><div style="font-size:12px">💧 Drip Irrigation</div></div>
+            <div class="action-btn" style="flex:none;padding:8px 14px;"><div style="font-size:12px">🏦 Loan Guidance</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Human Experts Available</div></div>
+          <div class="feed-item"><div class="feed-dot" style="background:#e8f5e9">👨‍🔬</div><div><div class="feed-title">Dr. Tariq — Plant Pathologist</div><div class="feed-desc">PARC · Available now · ~15 min response</div></div></div>
+          <div class="feed-item"><div class="feed-dot" style="background:#e3f2fd">👩‍🔬</div><div><div class="feed-title">Fazeelat Bibi — Soil Expert</div><div class="feed-desc">Punjab Agri Dept · Urdu/Punjabi support</div></div></div>
+          <div class="feed-item"><div class="feed-dot" style="background:#fff8e1">🚁</div><div><div class="feed-title">Drone Operator — Sheikhupura</div><div class="feed-desc">Aerial field mapping · PKR 2,000/acre</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Diversification Advisor</div><span class="badge badge-info">Reduce Monoculture Risk</span></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;">Pakistan over-relies on 5 crops. Diversify into mung bean, sunflower, or vegetables to reduce risk and improve soil health.</div>
+          <div style="display:flex;gap:4px;flex-wrap:wrap;">
+            <span class="tag">🫘 Mung Bean</span>
+            <span class="tag">🌻 Sunflower</span>
+            <span class="tag">🧅 Onion</span>
+            <span class="tag">🫑 Chilli</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Carbon Credits & Green Trade</div><span class="badge badge-warn">New 2026</span></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;">New international carbon tax rules affect Pakistani exports. Earn carbon credits through sustainable practices. Helps future-proof against EU carbon border taxes.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MACHINERY ===== -->
+    <div class="page" id="page-machinery">
+      <div class="section-title">AR Machinery Repair <span>On-device · No mechanic needed · Saves PKR 4,200+ per repair</span></div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Select Machinery Type</div></div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;">
+            <div class="action-btn"><div class="action-icon">🚜</div><div class="action-label">Tractor</div></div>
+            <div class="action-btn"><div class="action-icon">💦</div><div class="action-label">Water Pump</div></div>
+            <div class="action-btn"><div class="action-icon">⚙️</div><div class="action-label">Harvester</div></div>
+            <div class="action-btn"><div class="action-icon">🔩</div><div class="action-label">Thresher</div></div>
+          </div>
+          <button class="cta-btn" style="background:var(--g2)">📸 Start AR Camera Repair Mode</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">🗺️ Mechanic Finder — Nearby</div><span class="badge badge-green">3 Available</span></div>
+          <div class="feed-item"><div class="feed-dot" style="background:#e8f5e9">🔧</div><div><div class="feed-title">Usman's Agri Workshop · 2.4km</div><div class="feed-desc">Tractors & pumps · PKR 800/hr · ⭐ 4.7 (124 reviews)</div></div></div>
+          <div class="feed-item"><div class="feed-dot" style="background:#e3f2fd">🛠️</div><div><div class="feed-title">Tariq Auto & Farm Repair · 4.1km</div><div class="feed-desc">All machinery · PKR 600/hr · ⭐ 4.5 (88 reviews)</div></div></div>
+          <div class="feed-item"><div class="feed-dot" style="background:#fff8e1">⚡</div><div><div class="feed-title">Khan Diesel Services · 6.8km</div><div class="feed-desc">Tubewell pumps specialist · PKR 500/hr · ⭐ 4.3</div></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">✅ Recent Repair — Tractor Fuel Filter (Completed)</div><span class="badge badge-green">Saved PKR 4,200</span></div>
+        <div class="steps-row">
+          <div class="step-box"><div class="step-icon">📸</div><div class="step-title">Photo Taken</div><div class="step-sub">Engine compartment</div></div>
+          <div class="step-box"><div class="step-icon">🧠</div><div class="step-title">AI Diagnosed</div><div class="step-sub">Fuel filter · 87% confidence</div></div>
+          <div class="step-box"><div class="step-icon">👁️</div><div class="step-title">AR Guide Shown</div><div class="step-sub">5 step overlay</div></div>
+          <div class="step-box"><div class="step-icon">✅</div><div class="step-title">Fixed in 25 min</div><div class="step-sub">No mechanic needed</div></div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px;">
+        <div class="card-header"><div class="card-title">🤝 Machinery Sharing Pool</div><span class="badge badge-info">Save 60% on costs</span></div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.5">Share expensive machinery with neighboring farmers. Reduces per-acre operational cost for small landholders.</div>
+        <div class="grid-2">
+          <div class="feed-item"><div class="feed-dot" style="background:#e8f5e9">🚜</div><div><div class="feed-title">Tractor — Rasheed Farm · 3.2km</div><div class="feed-desc">New Holland 480 · PKR 900/hr · Available Tue–Thu</div></div></div>
+          <div class="feed-item"><div class="feed-dot" style="background:#e3f2fd">🌀</div><div><div class="feed-title">Thresher — Village Cooperative Pool</div><div class="feed-desc">PKR 1,200/acre · Booking open May harvest</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== COMMUNITY ===== -->
+    <div class="page" id="page-community">
+      <div class="section-title">Kisan Network <span>Connect · Share knowledge · Grow together</span></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">Community Feed</div><span class="badge badge-green">1.2K members</span></div>
+          <div class="feed-item">
+            <div class="feed-dot" style="background:#e8f5e9">👨‍🌾</div>
+            <div>
+              <div class="feed-title">Bashir Ahmed · Kasur</div>
+              <div class="feed-desc">Cotton whitefly se bachne ke liye neem spray 2 baar lagaya — 90% control ho gaya! PKR 340 mein masla hal 🌿</div>
+              <div class="feed-time">20 min ago · 47 likes · 12 comments</div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-dot" style="background:#e3f2fd">👩‍🌾</div>
+            <div>
+              <div class="feed-title">Rukhsana Bibi · Multan</div>
+              <div class="feed-desc">Punjab subsidy se drip irrigation lagwaya — pehle mahine mein 38% paani ki bachat! ZTBL loan ka process bhi asan tha.</div>
+              <div class="feed-time">2 hours ago · 83 likes</div>
+            </div>
+          </div>
+          <div class="feed-item">
+            <div class="feed-dot" style="background:#fff8e1">🧑‍🌾</div>
+            <div>
+              <div class="feed-title">Zubair Khan · Sheikhupura</div>
+              <div class="feed-desc">Soil test karwaya, zinc deficiency nikli — zinc sulfate dala, is dafa yield 18% barh gayi! Agri Vibe 360 ka shukriya.</div>
+              <div class="feed-time">5 hours ago · 102 likes</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Industrial Pollution Reporting</div><span class="badge badge-danger">Protect Your Land</span></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;">Report factory effluent dumping into irrigation canals. Geo-tagged reports sent directly to EPA and NDMA. Helps protect crops and livestock from industrial pollution.</div>
+          <button class="cta-btn" style="background:var(--danger)">🚨 Report Canal Pollution</button>
+
+          <div style="margin-top:14px;">
+            <div class="card-header" style="margin-bottom:8px;"><div class="card-title" style="font-size:12px">Urban Sprawl Alert</div></div>
+            <div style="font-size:11px;color:var(--muted);line-height:1.5">Housing society encroaching on fertile agricultural land near your area. Join collective legal action to protect farmland.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ALERTS ===== -->
+    <div class="page" id="page-alerts">
+      <div class="section-title">Disaster & Emergency Alerts <span>Real-time · NDMA · PMD · FAO integrated</span></div>
+
+      <button class="sos-btn">🚨 SOS — Emergency Farm Helpline (Call Now)</button>
+
+      <div class="grid-3">
+        <div class="card" style="grid-column:span 2;">
+          <div class="card-header"><div class="card-title">Active Alerts</div><span class="badge badge-danger">3 Active</span></div>
+          <div class="alert-item" style="background:#ffebee;margin-bottom:8px;">
+            <div class="alert-icon" style="background:#ffcdd2">🌡️</div>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:#c62828">URGENT: Heatwave 43°C Tomorrow — Punjab</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">Irrigate wheat before 6am. Delay all pesticide spraying. Protect livestock with shade and extra water.</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">Met Office PMD · 1 hour ago</div>
+            </div>
+          </div>
+          <div class="alert-item" style="background:#fff8e1;margin-bottom:8px;">
+            <div class="alert-icon" style="background:#fff9c4">🦟</div>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:#e65100">Locust Scout Report — Rahim Yar Khan</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">Small swarm spotted. Monitor fields daily. FAO coordination active. Spray crews on standby.</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">NDMA · FAO · 3 hours ago</div>
+            </div>
+          </div>
+          <div class="alert-item" style="background:#e3f2fd;">
+            <div class="alert-icon" style="background:#bbdefb">🌊</div>
+            <div>
+              <div style="font-size:12px;font-weight:600;color:#1565c0">GLOF Warning — Gilgit-Baltistan</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px;line-height:1.4">Glacial lake outburst risk elevated. Northern farmers: evacuate low-lying fields and livestock immediately.</div>
+              <div style="font-size:10px;color:var(--muted);margin-top:3px">PDMA · 6 hours ago</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">Crop Insurance Claim</div><span class="badge badge-info">Fasal Bima</span></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:10px;">Crop damaged by flood, hail, pest, or drought? File instant claim with geo-tagged photos. Average payout in 14 days.</div>
+          <button class="cta-btn">📋 File Damage Claim</button>
+
+          <div style="margin-top:14px;">
+            <div style="font-size:12px;font-weight:500;margin-bottom:8px;">Climate Resilience Tips</div>
+            <div style="font-size:11px;color:var(--text);line-height:1.8">
+              🌿 Grow heat-tolerant wheat (AARI-2022 variety)<br>
+              🪴 Diversify crops — reduce monoculture risk<br>
+              🌲 Plant windbreaks against desertification<br>
+              💦 Gypsum for saline soil restoration<br>
+              🏦 Always maintain Fasal Bima coverage
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== WOMEN & YOUTH ===== -->
+    <div class="page" id="page-women">
+      <div class="section-title">Women Farmer Empowerment & Youth Programme <span>Inclusive · SDG-aligned</span></div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><div class="card-title">👩‍🌾 Women Farmer Services</div><span class="badge badge-info">Dedicated Support</span></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:14px;">Women do much of the field work but rarely have a say in financial or land decisions. Agri Vibe 360 has a dedicated section with information and tools to empower women farmers.</div>
+          <div class="action-grid">
+            <div class="action-btn"><div class="action-icon">⚖️</div><div class="action-label">Land Rights Guide</div></div>
+            <div class="action-btn"><div class="action-icon">💳</div><div class="action-label">PPAF Microfinance</div></div>
+            <div class="action-btn"><div class="action-icon">🤝</div><div class="action-label">Self-Help Groups</div></div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="tag">📚 Skill Training</span>
+            <span class="tag">🏠 Home Garden Kits</span>
+            <span class="tag">🌸 SHG Finder</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header"><div class="card-title">🧑‍💻 Youth Skills Programme</div><span class="badge badge-warn">Keep Youth on Farms</span></div>
+          <div style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:14px;">The "TikTok generation" is leaving farms for cities. Agri Vibe 360's youth programme makes farming tech-enabled and profitable — earn while learning modern agri skills.</div>
+          <div class="action-grid">
+            <div class="action-btn"><div class="action-icon">🚁</div><div class="action-label">Drone Operator Cert</div></div>
+            <div class="action-btn"><div class="action-icon">📱</div><div class="action-label">Precision Ag Course</div></div>
+            <div class="action-btn"><div class="action-icon">🌐</div><div class="action-label">AgriTech Startup</div></div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="tag">🤖 AI & IoT Farming</span>
+            <span class="tag">📊 Data Analysis</span>
+            <span class="tag">💰 Earn Stipends</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><div class="card-title">🔭 Future Roadmap — Phase 2 & Beyond</div></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div class="step-box">
+            <div class="step-icon">📡</div>
+            <div class="step-title">IoT Sensors (2027)</div>
+            <div class="step-sub">Soil moisture, temp & humidity feeds into AI models for precision farming</div>
+          </div>
+          <div class="step-box">
+            <div class="step-icon">🚁</div>
+            <div class="step-title">Drone Monitoring (2027)</div>
+            <div class="step-sub">Aerial crop health mapping, disease spread detection across whole fields</div>
+          </div>
+          <div class="step-box">
+            <div class="step-icon">📈</div>
+            <div class="step-title">Predictive Analytics (2028)</div>
+            <div class="step-sub">Predict crop yields, disease outbreaks, and harvest windows months ahead</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app-shell -->
+
+<script>
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + id);
+  if (page) page.classList.add('active');
+  if (el && el.classList) el.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.textContent.toLowerCase().includes(id)) n.classList.add('active');
+    });
+  }
+  document.querySelector('.content').scrollTop = 0;
+}
+function setLang(el) {
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', function() {
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
